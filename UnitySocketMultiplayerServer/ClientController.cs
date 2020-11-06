@@ -8,7 +8,7 @@ namespace UnitySocketMultiplayerServer
 {
     class ClientController
     {
-        static bool isRun=true;
+        static bool isRun = true;
         static Dictionary<Guid, Client> clientMap = new Dictionary<Guid, Client>();
 
         public static void AcceptClient(TcpClient clientSocket)

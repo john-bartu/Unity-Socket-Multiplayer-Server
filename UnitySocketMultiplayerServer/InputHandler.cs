@@ -15,7 +15,7 @@ namespace UnitySocketMultiplayerServer
 
             while (Thread.CurrentThread.IsAlive)
             {
-                Console.ForegroundColor=ConsoleColor.Yellow;
+                Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.Write("server:admin> ");
 
                 string input = Console.ReadLine();
@@ -23,11 +23,11 @@ namespace UnitySocketMultiplayerServer
                 string command = "";
                 string argument = "";
 
-                if(parts.Length>0)
+                if (parts.Length > 0)
                     command = parts[0];
-                if (parts.Length>1 )
+                if (parts.Length > 1)
                     argument = parts[1];
-                
+
 
 
                 switch (command)
@@ -40,7 +40,7 @@ namespace UnitySocketMultiplayerServer
 
                     case "stat":
                         {
-                                Statistics.PrintStatistics();
+                            Statistics.PrintStatistics();
                             break;
                         }
 

@@ -45,7 +45,6 @@ namespace UnitySocketMultiplayerServer
 
         }
 
-
         public void PrintStat()
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
@@ -75,7 +74,7 @@ namespace UnitySocketMultiplayerServer
                 return clientList[uid];
             else
             {
-                Stat newStat = new Stat(uid.ToString().Substring(0,8));
+                Stat newStat = new Stat(uid.ToString().Substring(0, 8));
                 clientList.Add(uid, newStat);
 
                 return newStat;
@@ -104,8 +103,8 @@ namespace UnitySocketMultiplayerServer
             Console.WriteLine("------------------------");
             Console.WriteLine();
             Console.WriteLine("--------STAT-AVG--------");
-            Console.WriteLine("[UP]: " + upload/ time + " KB/s");
-            Console.WriteLine("[DO]: " + download/ time + " KB/s");
+            Console.WriteLine("[UP]: " + upload / time + " KB/s");
+            Console.WriteLine("[DO]: " + download / time + " KB/s");
             Console.WriteLine("------------------------");
             Console.ForegroundColor = ConsoleColor.White;
         }
