@@ -89,28 +89,32 @@ namespace UnitySocketMultiplayerServer
             {
                 Plant plant = player.Plants[id];
 
-                if (plant.Harvest())
+                if (plant.CanHarvest())
                 {
-                    sendData.data["id"] = id.ToString();
-                    sendData.data["interract"] = "harvested";
-                    player.Score += 1;
+                    if (plant.Harvest())
+                    {
+                        sendData.data["id"] = id.ToString();
+                        sendData.data["interract"] = "harvested";
+                        player.Score += 1;
+                    }
+                    else
+                    {
+                        sendData.errors.Add("its no time to harvest");
+                    }
                 }
                 else
                 {
-                    sendData.errors.Add("its no time to harvest");
-                }
 
-
-                if (plant.Seed())
-                {
-                    sendData.data["id"] = id.ToString();
-                    sendData.data["interract"] = "seed";
+                    if (plant.Seed())
+                    {
+                        sendData.data["id"] = id.ToString();
+                        sendData.data["interract"] = "seed";
+                    }
+                    else
+                    {
+                        sendData.errors.Add("its no time to seed");
+                    }
                 }
-                else
-                {
-                    sendData.errors.Add("its no time to seed");
-                }
-
             }
 
             sendData.data["interract"] = "unable";
