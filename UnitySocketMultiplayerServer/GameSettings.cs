@@ -16,7 +16,6 @@ namespace UnitySocketMultiplayerServer
         {
             long currentTime = (DateTime.Now.Ticks / TimeSpan.TicksPerSecond);
             float time = (currentTime - startTime);
-            //Debug.Log("Time " + time.ToString());
             return time;
         }
     }

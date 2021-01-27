@@ -16,8 +16,6 @@ namespace UnitySocketMultiplayerServer
 
         public List<Plant> plants { get; set; }
 
-        
-
         public class Plant
         {
             public float begin;
@@ -52,7 +50,7 @@ namespace UnitySocketMultiplayerServer
                     return true;
                 }
 
-                Debug.LogInfo("Plant cant be seeded");
+                Debug.LogInfo("Plant cannot be seeded");
                 return false;
             }
 

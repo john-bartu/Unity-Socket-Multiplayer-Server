@@ -23,7 +23,6 @@ namespace UnitySocketMultiplayerServer
             data = new Dictionary<string, string>();
             errors = new List<string>();
         }
-
     }
 
     class Client
@@ -99,34 +98,28 @@ namespace UnitySocketMultiplayerServer
             {
                 Plant plant = player.plants[id];
 
-
-                if (plant.CanHarvest())
+                if (plant.Harvest())
                 {
-                    if (plant.Harvest())
-                    {
-                        sendData.data["id"] = id.ToString();
-                        sendData.data["interract"] = "harvested";
-                        player.score += 1;
-                    }
-                    else
-                    {
-                        sendData.errors.Add("its no time to harvest");
-                    }
+                    sendData.data["id"] = id.ToString();
+                    sendData.data["interract"] = "harvested";
+                    player.score += 1;
+                }
+                else
+                {
+                    sendData.errors.Add("its no time to harvest");
                 }
 
 
-                if (plant.CanSeed())
+                if (plant.Seed())
                 {
-                    if (plant.Seed())
-                    {
-                        sendData.data["id"] = id.ToString();
-                        sendData.data["interract"] = "seed";
-                    }
-                    else
-                    {
-                        sendData.errors.Add("its no time to seed");
-                    }
+                    sendData.data["id"] = id.ToString();
+                    sendData.data["interract"] = "seed";
                 }
+                else
+                {
+                    sendData.errors.Add("its no time to seed");
+                }
+
             }
 
             sendData.data["interract"] = "unable";
@@ -166,22 +159,19 @@ namespace UnitySocketMultiplayerServer
                     }
                     else
                     {
-
                         Debug.LogError($"Unknown server action: {calledAction}");
                         sendData.errors.Add($"Unknown server action: {calledAction}");
-
                     }
 
                     string response = JsonConvert.SerializeObject(sendData);
 
-                    //Thread.Sleep(100);
                     SendData(response);
                 }
 
             }
             catch (Exception e)
             {
-                Debug.LogError("Something went wrong.");
+                Debug.LogError("Connection error");
                 Debug.LogError(e.Message);
                 Debug.LogError(e.StackTrace);
                 sw.Close();
@@ -196,7 +186,6 @@ namespace UnitySocketMultiplayerServer
 
             Debug.LogInfo("Thread Ended");
 
-            ClientController.FreeClient(this);
         }
 
         string ReceiveData()
@@ -213,7 +202,6 @@ namespace UnitySocketMultiplayerServer
             sw.Flush();
             Debug.LogData("SRV -> Client:\t" + json);
             Statistics.GetStat(uid).LogUploaded(Encoding.ASCII.GetByteCount(json));
-
         }
 
         void logIn(string login)
