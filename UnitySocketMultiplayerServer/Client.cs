@@ -1,22 +1,46 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
+using System.Threading;
+using static UnitySocketMultiplayerServer.Player;
 
 namespace UnitySocketMultiplayerServer
 {
+
+    class Data
+    {
+        public string action;
+        public Dictionary<string, string> data;
+        public List<string> errors;
+
+        public Data()
+        {
+            data = new Dictionary<string, string>();
+            errors = new List<string>();
+        }
+
+    }
+
     class Client
     {
+        Dictionary<string, Func<Data, Data, Data>> functionCaller;
+
+
         TcpClient client;
         NetworkStream stream;
         StreamReader sr;
         StreamWriter sw;
+        Player player;
         Guid uid;
-
 
         public Client(TcpClient newClient, Guid guid)
         {
+            initParser();
             client = newClient;
             stream = client.GetStream();
             uid = guid;
@@ -30,47 +54,186 @@ namespace UnitySocketMultiplayerServer
             return uid;
         }
 
+        Data cmdPing(Data sendData, Data receivedData)
+        {
+            sendData.data.Add("ping", "pong");
+            sendData.data.Add("clientTime", receivedData.data["clientTime"]);
+            sendData.data.Add("serverTime", (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond).ToString());
+            return sendData;
+        }
+
+        Data cmdLogIn(Data sendData, Data receivedData)
+        {
+
+            if (receivedData.data.ContainsKey("login"))
+            {
+                string login = receivedData.data["login"];
+                if (login.Length > 3)
+                {
+                    logIn(login);
+                    sendData.data.Add("id", player.Id.ToString());
+                }
+                else
+                    sendData.errors.Add("Login too short");
+            }
+            else
+                sendData.errors.Add("Key login not found");
+
+            return sendData;
+        }
+
+        void initParser()
+        {
+            functionCaller = new Dictionary<string, Func<Data, Data, Data>>();
+            functionCaller["ping"] = cmdPing;
+            functionCaller["login"] = cmdLogIn;
+            functionCaller["stats"] = cmdStat;
+            functionCaller["interract"] = cmdInterract;
+        }
+
+        private Data cmdInterract(Data sendData, Data receivedData)
+        {
+            int id = int.Parse(receivedData.data["id"]);
+
+            if (player != null)
+            {
+                Plant plant = player.plants[id];
+
+
+                if (plant.CanHarvest())
+                {
+                    if (plant.Harvest())
+                    {
+                        sendData.data["id"] = id.ToString();
+                        sendData.data["interract"] = "harvested";
+                        player.score += 1;
+                    }
+                    else
+                    {
+                        sendData.errors.Add("its no time to harvest");
+                    }
+                }
+
+
+                if (plant.CanSeed())
+                {
+                    if (plant.Seed())
+                    {
+                        sendData.data["id"] = id.ToString();
+                        sendData.data["interract"] = "seed";
+                    }
+                    else
+                    {
+                        sendData.errors.Add("its no time to seed");
+                    }
+                }
+            }
+
+            sendData.data["interract"] = "unable";
+
+            return sendData;
+        }
+
+        private Data cmdStat(Data sendData, Data receivedData)
+        {
+            sendData.data.Add("time", GameSettings.GetTime().ToString());
+            sendData.data.Add("plant1", player.plants[0].GetTime());
+            sendData.data.Add("plant2", player.plants[1].GetTime());
+            sendData.data.Add("plant3", player.plants[2].GetTime());
+            sendData.data.Add("plant4", player.plants[3].GetTime());
+            return sendData;
+        }
+
         public void Update()
         {
             Debug.LogInfo("Thread Started");
             try
             {
 
-                /*
-                  byte[] buffer = new byte[1024];
-                  stream.Read(buffer, 0, buffer.Length);
-                  int recv = 0;
-                  foreach (byte b in buffer)
-                  {
-                      if (b != 0)
-                      {
-                          recv++;
-                      }
-                  }
-                  string request = Encoding.UTF8.GetString(buffer, 0, recv);*/
                 while (true)
                 {
-                    string received = sr.ReadLine();
-                    Statistics.GetStat(uid).LogDownloaded(Encoding.ASCII.GetByteCount(received));
-                    //Debug.LogData("SRV «  Client: " + received);
+                    string received = ReceiveData();
+                    Data receivedData = JsonConvert.DeserializeObject<Data>(received);
 
-                    string response = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Nam ac suscipit orci, non pharetra elit. Maecenas eu auctor augue. Integer rutrum euismod enim efficitur pharetra. Sed eu ex vulputate, dignissim eros eu, gravida risus.Donec iaculis libero quis nunc fringilla lobortis.Curabitur tincidunt sit amet leo id malesuada.Donec porta massa vel massa facilisis, sit amet varius eros lobortis. hasellus mattis eget turpis id vestibulum. Integer iaculis sollicitudin pellentesque. Proin velit nulla, scelerisque sit amet malesuada ac, rutrum sit amet nibh. Maecenas ac sollicitudin metus, nec scelerisque quam. Aliquam nec vehicula quam. Nullam pretium malesuada magna, pulvinar dapibus libero dictum nec. Nulla fringilla neque ut posuere commodo. Praesent vel blandit risus, non vulputate ipsum. Nullam dui risus, facilisis ac molestie ut, luctus nec libero. Fusce eget luctus purus. Morbi eget rhoncus elit. Morbi nec elit malesuada, lobortis dolor ut, hendrerit lacus.Donec sit amet congue mi.Morbi in lobortis dolor, ut auctor leo. Donec tristique dolor sed porttitor malesuada. Morbi ante felis, ultricies non auctor a, venenatis sit amet nunc.Mauris efficitur felis sed ipsum ultricies convallis.Proin consectetur justo ac lorem vehicula porta.Morbi vel augue condimentum, varius odio quis, euismod dui.Pellentesque consectetur magna sit amet fermentum gravida.Praesent ac interdum lacus. Ut ac egestas ante. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.Curabitur non elementum diam. Suspendisse maximus turpis a erat luctus congue.Vestibulum lobortis dictum risus eu malesuada. Pellentesque feugiat erat vel sapien accumsan fringilla.Aenean non dictum elit. Ut non ultricies neque. Nunc sapien odio, blandit quis convallis eget, sodales vel mi. In in erat magna. Duis non feugiat sapien. In tincidunt turpis augue, non dignissim nisi pretium at. Mauris sed tristique mauris. Donec pulvinar, sem sit amet lacinia commodo, dui felis sodales sem, eu consequat arcu velit vel metus. Praesent lobortis, leo eget cursus tincidunt, felis magna commodo felis, quis varius neque sapien vitae sem.Cras suscipit dolor ex, at viverra magna finibus eu. Morbi volutpat auctor metus sed pharetra. Nullam auctor, erat elementum laoreet tincidunt, elit ante ornare mi, quis mattis dolor quam cursus ligula.Suspendisse ullamcorper venenatis mi vitae efficitur. Proin lorem odio, pretium eu nunc quis, cursus elementum augue. Phasellus lobortis eget leo nec molestie. Suspendisse ante nisl, ultrices a erat ac, congue lobortis orci. Aenean volutpat dignissim libero. Duis ultrices lacus ut neque bibendum porta.Pellentesque lobortis tincidunt elit, et laoreet arcu placerat eget. Maecenas feugiat, nibh tempor interdum dignissim, massa augue molestie justo, non interdum mauris purus at metus.Interdum et malesuada fames ac ante ipsum primis in faucibus.Nam erat dui, mattis id viverra id, consequat eget nisi. Quisque lacinia augue sit amet massa ultricies malesuada. Donec dignissim eu lorem at feugiat. Mauris fermentum nibh lacus. Vivamus accumsan ipsum et maximus viverra.";
-                    sw.WriteLine(response);
-                    sw.Flush();
-                    //Debug.LogData("SRV » Client: " + response);
-                    Statistics.GetStat(uid).LogUploaded(Encoding.ASCII.GetByteCount(response));
+                    string calledAction = receivedData.action;
+
+                    Data sendData = new Data();
+                    sendData.action = calledAction;
+
+                    if (functionCaller.ContainsKey(calledAction))
+                    {
+                        sendData = functionCaller[calledAction].Invoke(sendData, receivedData);
+                    }
+                    else
+                    {
+
+                        Debug.LogError($"Unknown server action: {calledAction}");
+                        sendData.errors.Add($"Unknown server action: {calledAction}");
+
+                    }
+
+                    string response = JsonConvert.SerializeObject(sendData);
+
+                    //Thread.Sleep(100);
+                    SendData(response);
                 }
 
             }
             catch (Exception e)
             {
                 Debug.LogError("Something went wrong.");
-                sw.WriteLine(e.ToString());
+                Debug.LogError(e.Message);
+                Debug.LogError(e.StackTrace);
+                sw.Close();
+                sr.Close();
+                client.Close();
+
+                if (player != null)
+                {
+                    Database.playerSave(player);
+                }
             }
 
             Debug.LogInfo("Thread Ended");
 
             ClientController.FreeClient(this);
+        }
+
+        string ReceiveData()
+        {
+            string received = sr.ReadLine();
+            Debug.LogData("SRV <-  Client:\t" + received);
+            Statistics.GetStat(uid).LogDownloaded(Encoding.ASCII.GetByteCount(received));
+            return received;
+        }
+
+        void SendData(string json)
+        {
+            sw.WriteLine(json);
+            sw.Flush();
+            Debug.LogData("SRV -> Client:\t" + json);
+            Statistics.GetStat(uid).LogUploaded(Encoding.ASCII.GetByteCount(json));
+
+        }
+
+        void logIn(string login)
+        {
+            if (player != null)
+            {
+                Debug.LogError("Client is already logged in!");
+                return;
+            }
+
+            int id = Database.playerGetID(login);
+
+            if (id >= 0)
+            {
+                player = Database.playerGet(id);
+            }
+            else
+            {
+                player = Database.playerInit(login);
+            }
         }
     }
 }

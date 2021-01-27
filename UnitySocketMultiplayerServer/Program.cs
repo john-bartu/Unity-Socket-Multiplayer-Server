@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.IO;
 using System.Threading;
+using System.Diagnostics;
 
 namespace UnitySocketMultiplayerServer
 {
@@ -10,10 +11,16 @@ namespace UnitySocketMultiplayerServer
     {
         static void Main(string[] args)
         {
-            TcpListener listener = new TcpListener(System.Net.IPAddress.Any, 1302);
+            Console.WriteLine("Initializing...");
+            Debug.LogInfo("Creating Database...");
+            Database.Init();
+            Debug.LogInfo("...created.");
+
+            TcpListener listener = new TcpListener(System.Net.IPAddress.Any, 3389);
             listener.Start();
 
             ClientController.onServerStart();
+            Debug.SetSilent(false);
 
             while (ClientController.isRunning())
             {

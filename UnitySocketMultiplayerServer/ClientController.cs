@@ -29,6 +29,7 @@ namespace UnitySocketMultiplayerServer
         public static void onServerStart()
         {
             // Start InputHandler for console commands
+            GameSettings.InitGame();
             Thread InstanceCaller = new Thread(new ThreadStart(InputHandler.Update));
             InstanceCaller.Start();
         }

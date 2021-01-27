@@ -38,6 +38,11 @@ namespace UnitySocketMultiplayerServer
         {
             if (!silentMode) LogColor("DATA", message, ConsoleColor.Blue);
         }
+        public static void LogDB(string message)
+        {
+            if (!silentMode) LogColor("DB", message, ConsoleColor.Yellow);
+        }
+
 
         public static void LogError(string message)
         {

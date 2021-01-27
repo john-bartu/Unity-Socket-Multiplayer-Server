@@ -15,6 +15,7 @@ namespace UnitySocketMultiplayerServer
 
             while (Thread.CurrentThread.IsAlive)
             {
+                Thread.Sleep(1000);
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.Write("server:admin> ");
 
@@ -27,8 +28,6 @@ namespace UnitySocketMultiplayerServer
                     command = parts[0];
                 if (parts.Length > 1)
                     argument = parts[1];
-
-
 
                 switch (command)
                 {
@@ -50,6 +49,7 @@ namespace UnitySocketMultiplayerServer
                             break;
                         }
                 }
+
                 Console.ForegroundColor = ConsoleColor.White;
 
             }
