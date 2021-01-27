@@ -68,6 +68,12 @@ namespace UnitySocketMultiplayerServer
             serverStopWatch.Start();
         }
 
+        /// <summary>
+        /// Get spcified client statistics
+        /// Create if not exists
+        /// </summary>
+        /// <param name="uid">client uid</param>
+        /// <returns>Stat object of specified client</returns>
         public static Stat GetStat(Guid uid)
         {
             if (clientList.ContainsKey(uid))
@@ -81,6 +87,9 @@ namespace UnitySocketMultiplayerServer
             }
         }
 
+        /// <summary>
+        /// Print Total Server Statistics
+        /// </summary>
         public static void PrintStatistics()
         {
             double download = 0;
