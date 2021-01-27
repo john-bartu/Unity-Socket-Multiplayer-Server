@@ -100,6 +100,8 @@ namespace UnitySocketMultiplayerServer
                     else
                     {
                         sendData.errors.Add("its no time to harvest");
+                        sendData.data["interract"] = "unable";
+
                     }
                 }
                 else
@@ -113,12 +115,13 @@ namespace UnitySocketMultiplayerServer
                     else
                     {
                         sendData.errors.Add("its no time to seed");
+                        sendData.data["interract"] = "unable";
+
                     }
                 }
             }
 
-            sendData.data["interract"] = "unable";
-
+       
             return sendData;
         }
 
