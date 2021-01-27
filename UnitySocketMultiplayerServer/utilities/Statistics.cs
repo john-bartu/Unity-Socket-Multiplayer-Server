@@ -120,5 +120,9 @@ namespace UnitySocketMultiplayerServer
             Console.ForegroundColor = ConsoleColor.White;
         }
 
+        internal static bool IsExist(Guid argument)
+        {
+            return clientList.ContainsKey(argument);
+        }
     }
 }

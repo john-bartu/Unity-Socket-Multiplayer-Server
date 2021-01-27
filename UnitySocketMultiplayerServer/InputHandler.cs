@@ -39,7 +39,16 @@ namespace UnitySocketMultiplayerServer
 
                     case "stat":
                         {
+                            if(argument=="")
                             Statistics.PrintStatistics();
+                            else
+                            {
+                                Guid guid = Guid.Parse(argument);
+                                if (Statistics.IsExist(guid))
+                                    Statistics.GetStat(guid).PrintStat();
+                                else
+                                    Debug.LogError("Provided");
+                            }
                             break;
                         }
 
