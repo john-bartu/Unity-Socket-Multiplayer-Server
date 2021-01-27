@@ -34,6 +34,7 @@ namespace UnitySocketMultiplayerServer
         readonly StreamWriter sw;
         private Player player;
         private Guid uid;
+        private bool isConnected;
 
         public Client(TcpClient newClient, Guid guid)
         {
@@ -43,7 +44,8 @@ namespace UnitySocketMultiplayerServer
             uid = guid;
             sr = new StreamReader(stream);
             sw = new StreamWriter(stream);
-            Debug.LogInfo("Client Stream Tunel created");
+            isConnected = true;
+            Debug.LogInfo($"{uid} Client Stream Tunel created");
         }
 
         public Guid GetUID()
@@ -77,17 +79,6 @@ namespace UnitySocketMultiplayerServer
                 sendData.errors.Add("Key login not found");
 
             return sendData;
-        }
-
-        void InitParser()
-        {
-            functionCaller = new Dictionary<string, Func<Data, Data, Data>>
-            {
-                ["ping"] = CMDPing,
-                ["login"] = CMDLogIn,
-                ["stats"] = CMDStat,
-                ["interract"] = CMDInterract
-            };
         }
 
         private Data CMDInterract(Data sendData, Data receivedData)
@@ -137,15 +128,37 @@ namespace UnitySocketMultiplayerServer
             return sendData;
         }
 
+        private Data CMDExit(Data sendData, Data receivedData)
+        {
+            sendData.data.Add("exit", "exit");
+            onDisconnect();
+            return sendData;
+        }
+        void InitParser()
+        {
+            functionCaller = new Dictionary<string, Func<Data, Data, Data>>
+            {
+                ["ping"] = CMDPing,
+                ["login"] = CMDLogIn,
+                ["stats"] = CMDStat,
+                ["interract"] = CMDInterract,
+                ["exit"] = CMDExit
+            };
+        }
+
         public void Update()
         {
             Debug.LogInfo("Thread Started");
             try
             {
 
-                while (true)
+                while (isConnected)
                 {
                     string received = ReceiveData();
+
+                    if (received == null)
+                        break;
+
                     Data receivedData = JsonConvert.DeserializeObject<Data>(received);
 
                     string calledAction = receivedData.action;
@@ -169,7 +182,6 @@ namespace UnitySocketMultiplayerServer
 
                     SendData(response);
                 }
-
             }
             catch (Exception e)
             {
@@ -179,31 +191,60 @@ namespace UnitySocketMultiplayerServer
                 sw.Close();
                 sr.Close();
                 client.Close();
-
-                if (player != null)
-                {
-                    Database.PlayerSave(player);
-                }
             }
+
+            onDisconnect();
 
             Debug.LogInfo("Thread Ended");
 
         }
 
+        void onDisconnect()
+        {
+            isConnected = false;
+            if (player != null)
+            {
+                Database.PlayerSave(player);
+            }
+        }
+
         string ReceiveData()
         {
-            string received = sr.ReadLine();
-            Debug.LogData("SRV <-  Client:\t" + received);
-            Statistics.GetStat(uid).LogDownloaded(Encoding.ASCII.GetByteCount(received));
-            return received;
+            try
+            {
+                string received = sr.ReadLine();
+                Debug.LogData("SRV <-  Client:\t" + received);
+                if (received == null)
+                {
+                    Debug.LogError("SRV <- Client: Send null message...");
+                    return null;
+                }
+                Statistics.GetStat(uid).LogDownloaded(Encoding.ASCII.GetByteCount(received));
+                return received;
+            }
+            catch
+            {
+                Debug.LogError("SRV <- Client: Connection forced to close during receiving...");
+                onDisconnect();
+                return null;
+            }
+     
         }
 
         void SendData(string json)
         {
-            sw.WriteLine(json);
-            sw.Flush();
-            Debug.LogData("SRV -> Client:\t" + json);
-            Statistics.GetStat(uid).LogUploaded(Encoding.ASCII.GetByteCount(json));
+            try
+            {
+                sw.WriteLine(json);
+                sw.Flush();
+                Debug.LogData("SRV -> Client:\t" + json);
+                Statistics.GetStat(uid).LogUploaded(Encoding.ASCII.GetByteCount(json));
+            }
+            catch
+            {
+                Debug.LogError("SRV -> Client: Connection forced to close during sending...");
+                onDisconnect();
+            }
         }
 
         void LogIn(string login)
