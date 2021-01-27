@@ -10,11 +10,11 @@ namespace UnitySocketMultiplayerServer
         public int Id { get; set; }
         public string Login { get; set; }
 
-        public string[] strPlantArray { get; set; }
+        public string[] StrPlantArray { get; set; }
 
-        public int score { get; set; }
+        public int Score { get; set; }
 
-        public List<Plant> plants { get; set; }
+        public List<Plant> Plants { get; set; }
 
         public class Plant
         {
@@ -89,13 +89,15 @@ namespace UnitySocketMultiplayerServer
         public Player(string login)
         {
             this.Login = login;
-            this.score = 0;
-            this.strPlantArray = new string[4];
-            this.plants = new List<Plant>();
-            this.plants.Add(new Plant());
-            this.plants.Add(new Plant());
-            this.plants.Add(new Plant());
-            this.plants.Add(new Plant());
+            this.Score = 0;
+            this.StrPlantArray = new string[4];
+            this.Plants = new List<Plant>
+            {
+                new Plant(),
+                new Plant(),
+                new Plant(),
+                new Plant()
+            };
         }
     }
 }

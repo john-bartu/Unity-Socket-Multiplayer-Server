@@ -33,7 +33,7 @@ namespace UnitySocketMultiplayerServer
                 {
                     case "stop":
                         {
-                            ClientController.stopServer();
+                            ClientController.StopServer();
                             break;
                         }
 

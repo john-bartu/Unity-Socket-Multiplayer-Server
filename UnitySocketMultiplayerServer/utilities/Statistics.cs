@@ -7,17 +7,17 @@ namespace UnitySocketMultiplayerServer
 {
     class Stat
     {
-        string client;
+        readonly Stopwatch statStopwatch;
+        readonly string client;
         long download;
         long upload;
-        Stopwatch stopwatch;
 
         public Stat(string name)
         {
             download = 0;
             upload = 0;
-            stopwatch = new Stopwatch();
-            stopwatch.Start();
+            statStopwatch = new Stopwatch();
+            statStopwatch.Start();
             client = name;
         }
 
@@ -31,7 +31,7 @@ namespace UnitySocketMultiplayerServer
         }
         public double GetTime()
         {
-            return stopwatch.ElapsedMilliseconds / 1000;
+            return statStopwatch.ElapsedMilliseconds / 1000;
         }
 
         public double GetDownload()
@@ -52,7 +52,7 @@ namespace UnitySocketMultiplayerServer
             Console.WriteLine("[ID]: " + client);
             Console.WriteLine("[UP]: " + GetUpload() + " KB");
             Console.WriteLine("[DO]: " + GetDownload() + " KB");
-            Console.WriteLine("[TIME]: " + stopwatch.ElapsedMilliseconds / 1000 + " s");
+            Console.WriteLine("[TIME]: " + statStopwatch.ElapsedMilliseconds / 1000 + " s");
             Console.WriteLine("------------------------");
             Console.ForegroundColor = ConsoleColor.White;
         }
@@ -60,12 +60,12 @@ namespace UnitySocketMultiplayerServer
 
     class Statistics
     {
-        static Dictionary<Guid, Stat> clientList = new Dictionary<Guid, Stat>();
-        static Stopwatch stopwatch = new Stopwatch();
+        static readonly Dictionary<Guid, Stat> clientList = new Dictionary<Guid, Stat>();
+        static readonly Stopwatch serverStopWatch = new Stopwatch();
 
         static Statistics()
         {
-            stopwatch.Start();
+            serverStopWatch.Start();
         }
 
         public static Stat GetStat(Guid uid)
@@ -93,7 +93,7 @@ namespace UnitySocketMultiplayerServer
                 upload += enumerator.Current.Value.GetUpload();
             }
 
-            double time = stopwatch.ElapsedMilliseconds / 1000;
+            double time = serverStopWatch.ElapsedMilliseconds / 1000;
 
             if (time < 0.001) time = 1; // Avoid divide per zero
 

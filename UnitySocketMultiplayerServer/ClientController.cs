@@ -9,7 +9,7 @@ namespace UnitySocketMultiplayerServer
     class ClientController
     {
         static bool isRun = true;
-        static Dictionary<Guid, Client> clientMap = new Dictionary<Guid, Client>();
+        static readonly Dictionary<Guid, Client> clientMap = new Dictionary<Guid, Client>();
 
         public static void AcceptClient(TcpClient clientSocket)
         {
@@ -26,7 +26,7 @@ namespace UnitySocketMultiplayerServer
             clientMap.Remove(client.GetUID());
         }
 
-        public static void onServerStart()
+        public static void OnServerStart()
         {
             // Start InputHandler for console commands
             GameSettings.InitGame();
@@ -34,18 +34,18 @@ namespace UnitySocketMultiplayerServer
             InstanceCaller.Start();
         }
 
-        public static void stopServer()
+        public static void StopServer()
         {
             isRun = false;
-            onServerClose();
+            OnServerClose();
         }
 
-        public static void onServerClose()
+        public static void OnServerClose()
         {
             Statistics.PrintStatistics();
         }
 
-        public static bool isRunning()
+        public static bool IsRunning()
         {
             return isRun;
         }

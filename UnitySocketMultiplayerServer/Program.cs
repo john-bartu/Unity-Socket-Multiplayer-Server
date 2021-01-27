@@ -19,10 +19,10 @@ namespace UnitySocketMultiplayerServer
             TcpListener listener = new TcpListener(System.Net.IPAddress.Any, 3389);
             listener.Start();
 
-            ClientController.onServerStart();
+            ClientController.OnServerStart();
             Debug.SetSilent(false);
 
-            while (ClientController.isRunning())
+            while (ClientController.IsRunning())
             {
                 Debug.LogInfo("Waiting for a connection.");
                 TcpClient clientSocket = listener.AcceptTcpClient();

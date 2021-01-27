@@ -28,18 +28,16 @@ namespace UnitySocketMultiplayerServer
     class Client
     {
         Dictionary<string, Func<Data, Data, Data>> functionCaller;
-
-
-        TcpClient client;
-        NetworkStream stream;
-        StreamReader sr;
-        StreamWriter sw;
-        Player player;
-        Guid uid;
+        readonly TcpClient client;
+        readonly NetworkStream stream;
+        readonly StreamReader sr;
+        readonly StreamWriter sw;
+        private Player player;
+        private Guid uid;
 
         public Client(TcpClient newClient, Guid guid)
         {
-            initParser();
+            InitParser();
             client = newClient;
             stream = client.GetStream();
             uid = guid;
@@ -53,7 +51,7 @@ namespace UnitySocketMultiplayerServer
             return uid;
         }
 
-        Data cmdPing(Data sendData, Data receivedData)
+        Data CMDPing(Data sendData, Data receivedData)
         {
             sendData.data.Add("ping", "pong");
             sendData.data.Add("clientTime", receivedData.data["clientTime"]);
@@ -61,7 +59,7 @@ namespace UnitySocketMultiplayerServer
             return sendData;
         }
 
-        Data cmdLogIn(Data sendData, Data receivedData)
+        Data CMDLogIn(Data sendData, Data receivedData)
         {
 
             if (receivedData.data.ContainsKey("login"))
@@ -69,7 +67,7 @@ namespace UnitySocketMultiplayerServer
                 string login = receivedData.data["login"];
                 if (login.Length > 3)
                 {
-                    logIn(login);
+                    LogIn(login);
                     sendData.data.Add("id", player.Id.ToString());
                 }
                 else
@@ -81,28 +79,30 @@ namespace UnitySocketMultiplayerServer
             return sendData;
         }
 
-        void initParser()
+        void InitParser()
         {
-            functionCaller = new Dictionary<string, Func<Data, Data, Data>>();
-            functionCaller["ping"] = cmdPing;
-            functionCaller["login"] = cmdLogIn;
-            functionCaller["stats"] = cmdStat;
-            functionCaller["interract"] = cmdInterract;
+            functionCaller = new Dictionary<string, Func<Data, Data, Data>>
+            {
+                ["ping"] = CMDPing,
+                ["login"] = CMDLogIn,
+                ["stats"] = CMDStat,
+                ["interract"] = CMDInterract
+            };
         }
 
-        private Data cmdInterract(Data sendData, Data receivedData)
+        private Data CMDInterract(Data sendData, Data receivedData)
         {
             int id = int.Parse(receivedData.data["id"]);
 
             if (player != null)
             {
-                Plant plant = player.plants[id];
+                Plant plant = player.Plants[id];
 
                 if (plant.Harvest())
                 {
                     sendData.data["id"] = id.ToString();
                     sendData.data["interract"] = "harvested";
-                    player.score += 1;
+                    player.Score += 1;
                 }
                 else
                 {
@@ -127,13 +127,13 @@ namespace UnitySocketMultiplayerServer
             return sendData;
         }
 
-        private Data cmdStat(Data sendData, Data receivedData)
+        private Data CMDStat(Data sendData, Data receivedData)
         {
             sendData.data.Add("time", GameSettings.GetTime().ToString());
-            sendData.data.Add("plant1", player.plants[0].GetTime());
-            sendData.data.Add("plant2", player.plants[1].GetTime());
-            sendData.data.Add("plant3", player.plants[2].GetTime());
-            sendData.data.Add("plant4", player.plants[3].GetTime());
+            sendData.data.Add("plant1", player.Plants[0].GetTime());
+            sendData.data.Add("plant2", player.Plants[1].GetTime());
+            sendData.data.Add("plant3", player.Plants[2].GetTime());
+            sendData.data.Add("plant4", player.Plants[3].GetTime());
             return sendData;
         }
 
@@ -150,8 +150,10 @@ namespace UnitySocketMultiplayerServer
 
                     string calledAction = receivedData.action;
 
-                    Data sendData = new Data();
-                    sendData.action = calledAction;
+                    Data sendData = new Data
+                    {
+                        action = calledAction
+                    };
 
                     if (functionCaller.ContainsKey(calledAction))
                     {
@@ -180,7 +182,7 @@ namespace UnitySocketMultiplayerServer
 
                 if (player != null)
                 {
-                    Database.playerSave(player);
+                    Database.PlayerSave(player);
                 }
             }
 
@@ -204,7 +206,7 @@ namespace UnitySocketMultiplayerServer
             Statistics.GetStat(uid).LogUploaded(Encoding.ASCII.GetByteCount(json));
         }
 
-        void logIn(string login)
+        void LogIn(string login)
         {
             if (player != null)
             {
@@ -212,15 +214,15 @@ namespace UnitySocketMultiplayerServer
                 return;
             }
 
-            int id = Database.playerGetID(login);
+            int id = Database.PlayerGetID(login);
 
             if (id >= 0)
             {
-                player = Database.playerGet(id);
+                player = Database.PlayerGet(id);
             }
             else
             {
-                player = Database.playerInit(login);
+                player = Database.PlayerInit(login);
             }
         }
     }
