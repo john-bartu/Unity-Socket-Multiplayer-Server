@@ -95,6 +95,8 @@ namespace UnitySocketMultiplayerServer
 
             double time = stopwatch.ElapsedMilliseconds / 1000;
 
+            if (time < 0.001) time = 1; // Avoid divide per zero
+
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("----------STAT----------");
             Console.WriteLine("[UP]: " + upload + " KB");
