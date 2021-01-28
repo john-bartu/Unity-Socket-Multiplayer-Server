@@ -67,7 +67,7 @@ namespace UnitySocketMultiplayerServer
         /// <param name="sendData">Tempalte data to send</param>
         /// <param name="receivedData">Received data from client</param>
         /// <returns></returns>
-        Data CMDPing(Data sendData, Data receivedData)
+        private Data CMDPing(Data sendData, Data receivedData)
         {
             sendData.data.Add("ping", "pong");
             sendData.data.Add("clientTime", receivedData.data["clientTime"]);
@@ -80,7 +80,7 @@ namespace UnitySocketMultiplayerServer
         /// <param name="sendData">Tempalte data to send</param>
         /// <param name="receivedData">Received data from client</param>
         /// <returns></returns>
-        Data CMDLogIn(Data sendData, Data receivedData)
+        private Data CMDLogIn(Data sendData, Data receivedData)
         {
 
             if (receivedData.data.ContainsKey("login"))

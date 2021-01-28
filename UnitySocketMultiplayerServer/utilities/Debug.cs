@@ -38,6 +38,7 @@ namespace UnitySocketMultiplayerServer
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine('[' + tag + "]: " + message);
         }
+
         /// <summary>
         /// Log line of text with tag and color
         /// [TAG]: Message (colorized)

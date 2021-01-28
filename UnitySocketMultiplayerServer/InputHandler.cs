@@ -39,8 +39,8 @@ namespace UnitySocketMultiplayerServer
 
                     case "stat":
                         {
-                            if(argument=="")
-                            Statistics.PrintStatistics();
+                            if (argument == "")
+                                Statistics.PrintStatistics();
                             else
                             {
                                 Guid guid = Guid.Parse(argument);

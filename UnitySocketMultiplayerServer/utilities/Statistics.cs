@@ -56,6 +56,7 @@ namespace UnitySocketMultiplayerServer
         {
             return download / 1024;
         }
+
         /// <summary>
         /// KiloBytes of data uploaded
         /// </summary>
@@ -65,7 +66,7 @@ namespace UnitySocketMultiplayerServer
             return upload / 1024;
 
         }
-        
+
         /// <summary>
         /// Prints summary of client upload/download and time
         /// </summary>

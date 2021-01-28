@@ -11,7 +11,6 @@ namespace UnitySocketMultiplayerServer
         static bool isRun = true;
         static readonly Dictionary<Guid, Client> clientMap = new Dictionary<Guid, Client>();
 
-
         /// <summary>
         /// Accept client socket and create new Thread
         /// </summary>
@@ -45,7 +44,6 @@ namespace UnitySocketMultiplayerServer
             Thread InstanceCaller = new Thread(new ThreadStart(InputHandler.Update));
             InstanceCaller.Start();
         }
-
 
         /// <summary>
         /// Only on server stop
