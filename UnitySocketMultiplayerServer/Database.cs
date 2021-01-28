@@ -11,11 +11,19 @@ namespace UnitySocketMultiplayerServer
 
         static LiteDatabase db;
 
+        /// <summary>
+        /// Create/Load Database file
+        /// </summary>
         public static void Init()
         {
             db = new LiteDatabase(@"database.db");
         }
 
+        /// <summary>
+        /// Get Player ID with given name
+        /// </summary>
+        /// <param name="findLogin">Player Login</param>
+        /// <returns>Player ID, -1 if not exists in database</returns>
         public static int PlayerGetID(string findLogin)
         {
             var users = db.GetCollection<Player>("players");
@@ -34,6 +42,10 @@ namespace UnitySocketMultiplayerServer
 
         }
 
+        /// <summary>
+        /// Save Player object to database
+        /// </summary>
+        /// <param name="player">Player object to save</param>
         public static void PlayerSave(Player player)
         {
 
@@ -67,6 +79,11 @@ namespace UnitySocketMultiplayerServer
             }
         }
 
+        /// <summary>
+        /// Load player from Database
+        /// </summary>
+        /// <param name="id">ID row, where player is</param>
+        /// <returns>Player from Database, null if not exists</returns>
         public static Player PlayerGet(int id)
         {
             var users = db.GetCollection<Player>("players");
@@ -98,6 +115,11 @@ namespace UnitySocketMultiplayerServer
 
         }
 
+        /// <summary>
+        /// Init Player Object from database
+        /// </summary>
+        /// <param name="login">Provide player login</param>
+        /// <returns>Initialized Player Object with values from database</returns>
         public static Player PlayerInit(string login)
         {
             var users = db.GetCollection<Player>("players");

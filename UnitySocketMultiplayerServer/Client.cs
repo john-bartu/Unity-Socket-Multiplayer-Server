@@ -36,6 +36,11 @@ namespace UnitySocketMultiplayerServer
         private Guid uid;
         private bool isConnected;
 
+        /// <summary>
+        /// Initialzie client object
+        /// </summary>
+        /// <param name="newClient">TCP socket of connected client</param>
+        /// <param name="guid">Unique client UID</param>
         public Client(TcpClient newClient, Guid guid)
         {
             InitParser();
@@ -48,11 +53,20 @@ namespace UnitySocketMultiplayerServer
             Debug.LogInfo($"{uid} Client Stream Tunel created");
         }
 
+        /// <summary>
+        /// Return client UID
+        /// </summary>
+        /// <returns></returns>
         public Guid GetUID()
         {
             return uid;
         }
-
+        /// <summary>
+        /// Called to receive answer from the server
+        /// </summary>
+        /// <param name="sendData">Tempalte data to send</param>
+        /// <param name="receivedData">Received data from client</param>
+        /// <returns></returns>
         Data CMDPing(Data sendData, Data receivedData)
         {
             sendData.data.Add("ping", "pong");
@@ -60,7 +74,12 @@ namespace UnitySocketMultiplayerServer
             sendData.data.Add("serverTime", (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond).ToString());
             return sendData;
         }
-
+        /// <summary>
+        /// Called to log in client to achieve player object
+        /// </summary>
+        /// <param name="sendData">Tempalte data to send</param>
+        /// <param name="receivedData">Received data from client</param>
+        /// <returns></returns>
         Data CMDLogIn(Data sendData, Data receivedData)
         {
 
@@ -81,6 +100,12 @@ namespace UnitySocketMultiplayerServer
             return sendData;
         }
 
+        /// <summary>
+        /// Called to interact with specified plant
+        /// </summary>
+        /// <param name="sendData">Tempalte data to send</param>
+        /// <param name="receivedData">Received data from client</param>
+        /// <returns></returns>
         private Data CMDInterract(Data sendData, Data receivedData)
         {
             int id = int.Parse(receivedData.data["id"]);
@@ -121,10 +146,16 @@ namespace UnitySocketMultiplayerServer
                 }
             }
 
-       
+
             return sendData;
         }
 
+        /// <summary>
+        /// Call to receiving world statistics
+        /// </summary>
+        /// <param name="sendData">Tempalte data to send</param>
+        /// <param name="receivedData">Received data from client</param>
+        /// <returns></returns>
         private Data CMDStat(Data sendData, Data receivedData)
         {
             sendData.data.Add("time", GameSettings.GetTime().ToString());
@@ -135,12 +166,22 @@ namespace UnitySocketMultiplayerServer
             return sendData;
         }
 
+        /// <summary>
+        /// Call client exit
+        /// </summary>
+        /// <param name="sendData">Tempalte data to send</param>
+        /// <param name="receivedData">Received data from client</param>
+        /// <returns></returns>
         private Data CMDExit(Data sendData, Data receivedData)
         {
             sendData.data.Add("exit", "exit");
             onDisconnect();
             return sendData;
         }
+
+        /// <summary>
+        /// Initialize parsing Dictionary <COMMAND,FUNCTION>
+        /// </summary>
         void InitParser()
         {
             functionCaller = new Dictionary<string, Func<Data, Data, Data>>
@@ -153,6 +194,9 @@ namespace UnitySocketMultiplayerServer
             };
         }
 
+        /// <summary>
+        /// Main loop of client functionality
+        /// </summary>
         public void Update()
         {
             Debug.LogInfo("Thread Started");
@@ -195,9 +239,6 @@ namespace UnitySocketMultiplayerServer
                 Debug.LogError("Connection error");
                 Debug.LogError(e.Message);
                 Debug.LogError(e.StackTrace);
-                sw.Close();
-                sr.Close();
-                client.Close();
             }
 
             onDisconnect();
@@ -206,15 +247,26 @@ namespace UnitySocketMultiplayerServer
 
         }
 
+        /// <summary>
+        /// Call if clients need to be disconnected
+        /// </summary>
         void onDisconnect()
         {
             isConnected = false;
+            sw.Close();
+            sr.Close();
+            client.Close();
             if (player != null)
             {
                 Database.PlayerSave(player);
             }
+            ClientController.FreeClient(this);
         }
 
+        /// <summary>
+        /// Recveive one string line from Client and collect statistics
+        /// </summary>
+        /// <returns>String line</returns>
         string ReceiveData()
         {
             try
@@ -235,9 +287,13 @@ namespace UnitySocketMultiplayerServer
                 onDisconnect();
                 return null;
             }
-     
+
         }
 
+        /// <summary>
+        /// Send string to client and collect statistics
+        /// </summary>
+        /// <param name="json">string to send</param>
         void SendData(string json)
         {
             try
@@ -254,6 +310,11 @@ namespace UnitySocketMultiplayerServer
             }
         }
 
+
+        /// <summary>
+        /// Do when logging in
+        /// </summary>
+        /// <param name="login">Login to log-in</param>
         void LogIn(string login)
         {
             if (player != null)

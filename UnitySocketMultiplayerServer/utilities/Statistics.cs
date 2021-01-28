@@ -21,30 +21,54 @@ namespace UnitySocketMultiplayerServer
             client = name;
         }
 
+        /// <summary>
+        /// Log downloaded bytes
+        /// </summary>
+        /// <param name="bytes">Number of bytes</param>
         public void LogDownloaded(int bytes)
         {
             download += bytes;
         }
+
+        /// <summary>
+        /// Log uploaded bytes
+        /// </summary>
+        /// <param name="bytes">Number of bytes</param>
         public void LogUploaded(int bytes)
         {
             upload += bytes;
         }
+
+        /// <summary>
+        /// Check time since construtor
+        /// </summary>
+        /// <returns>Time elapsed since constructor</returns>
         public double GetTime()
         {
             return statStopwatch.ElapsedMilliseconds / 1000;
         }
 
+        /// <summary>
+        /// KiloBytes of data downloaded
+        /// </summary>
+        /// <returns>KiloBytes of data downloaded</returns>
         public double GetDownload()
         {
             return download / 1024;
         }
-
+        /// <summary>
+        /// KiloBytes of data uploaded
+        /// </summary>
+        /// <returns>KiloBytes of data uploaded</returns>
         public double GetUpload()
         {
             return upload / 1024;
 
         }
-
+        
+        /// <summary>
+        /// Prints summary of client upload/download and time
+        /// </summary>
         public void PrintStat()
         {
             Console.ForegroundColor = ConsoleColor.Cyan;

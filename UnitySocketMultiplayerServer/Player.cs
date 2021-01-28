@@ -10,6 +10,9 @@ namespace UnitySocketMultiplayerServer
         public int Id { get; set; }
         public string Login { get; set; }
 
+        /// <summary>
+        /// Array of serialized Plants for Database
+        /// </summary>
         public string[] StrPlantArray { get; set; }
 
         public int Score { get; set; }
@@ -21,13 +24,19 @@ namespace UnitySocketMultiplayerServer
             public float begin;
             public float end;
 
+            /// <summary>
+            /// initialzie plant with begin/end -1 (globaly not seeded)
+            /// </summary>
             public Plant()
             {
                 begin = -1;
                 end = -1;
             }
 
-
+            /// <summary>
+            /// Check if plant is ready for seed
+            /// </summary>
+            /// <returns>True if can be seed</returns>
             public bool CanSeed()
             {
                 if (begin > 0)
@@ -39,7 +48,10 @@ namespace UnitySocketMultiplayerServer
                     return true;
                 }
             }
-
+            /// <summary>
+            /// Check if plant can be seeded and seed with end time "Server Time + 18"
+            /// </summary>
+            /// <returns>If seeding done with success</returns>
             public bool Seed()
             {
                 if (CanSeed())
@@ -54,6 +66,10 @@ namespace UnitySocketMultiplayerServer
                 return false;
             }
 
+            /// <summary>
+            /// Check if plant is ready for harvest
+            /// </summary>
+            /// <returns>True if ready to harvest</returns>
             public bool CanHarvest()
             {
                 if (GameSettings.GetTime() > end)
@@ -63,6 +79,10 @@ namespace UnitySocketMultiplayerServer
 
             }
 
+            /// <summary>
+            /// If can harvest, change time of plants.
+            /// </summary>
+            /// <returns>If harvesting was done with success</returns>
             public bool Harvest()
             {
                 if (CanHarvest())
@@ -80,6 +100,10 @@ namespace UnitySocketMultiplayerServer
 
             }
 
+            /// <summary>
+            /// Time plant begin|end for Database purposes
+            /// </summary>
+            /// <returns>String of "begin , end" times</returns>
             public string GetTime()
             {
                 return begin + "," + end;
