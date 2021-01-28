@@ -1,3 +1,5 @@
 # Unity-Socket-Multiplayer-Server
-![Diagram1](UnityServerDiagram.png)
-![Diagram2](UnityServerDiagram2.png)
+## Diagram of Main Server Threads creation
+![Diagram1](images/UnityServerDiagram.png)
+## Diagram of Client Thread creation
+![Diagram2](images/UnityServerDiagram2.png)
